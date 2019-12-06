@@ -334,12 +334,20 @@ namespace IPA.Loader
                 #region Fix assemblies for refactor
 
                 var module = ModuleDefinition.ReadModule(Path.Combine(pluginDirectory, s));
+                int legacyAssemblyCSharpMods = 0;
                 foreach (var @ref in module.AssemblyReferences)
                 { // fix assembly references
                     if (@ref.Name == "IllusionPlugin" || @ref.Name == "IllusionInjector")
                     {
                         @ref.Name = "IPA.Loader";
+                    }else if (@ref.Name == "Assembly-CSharp")
+                    {
+                        ++legacyAssemblyCSharpMods;
+                        @ref.Name = "MainAssembly";
                     }
+                }
+                if (legacyAssemblyCSharpMods > 0) {
+                    Logger.log.Notice($"{legacyAssemblyCSharpMods} mod(s) detected that reference Assembly-CSharp. While fixing references could still work, be warned that it might not fix every mod.");
                 }
 
                 foreach (var @ref in module.GetTypeReferences())
